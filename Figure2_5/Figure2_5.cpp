@@ -50,50 +50,52 @@ int main()
 {
     vector<double> knot_vector = {0,0,0,1,2,3,4,4,5,5,5};
     ofstream ofs("N_1_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 1, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    int order = 2;
+    double to = 5.0;
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 1, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_2_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 2, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 2, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_3_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 3, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 3, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_4_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 4, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 4, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_5_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 5, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 5, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_6_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 6, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 6, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_7_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 7, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 7, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 
     ofs.open("N_8_2.dat");
-    for(double i=0.0; i<=5.0; i+=0.01){
-        ofs << i << " " << p_order_N(knot_vector, 8, 2, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
+    for(double i=0.0; i<=to; i+=0.01){
+        ofs << i << " " << p_order_N(knot_vector, 8, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
 }

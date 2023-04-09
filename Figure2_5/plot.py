@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 data_dict = {}
 
 # ディレクトリ内のすべてのdatファイルを検索
-for file in glob.glob('*.dat'):
+for file in glob.glob('N_*.dat'):
     # datファイルを開く
     with open(file, 'r') as f:
         # 各行を読み込み、x座標とy座標に分割してリストに追加
