@@ -49,7 +49,7 @@ double p_order_N(vector<double> knot_vector, int index, int order, double c)
 int main()
 {
     vector<double> knot_vector = {0,0,0,1,2,3,4,4,5,5,5};
-    int order = 4;
+    int order = 2;
     double to = 5.0;
     ofstream ofs("N_1_2.dat");
     for(double i=0.0; i<=to; i+=0.01){
@@ -86,16 +86,15 @@ int main()
         ofs << i << " " << p_order_N(knot_vector, 6, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
-
     ofs.open("N_7_2.dat");
     for(double i=0.0; i<=to; i+=0.01){
         ofs << i << " " << p_order_N(knot_vector, 7, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
     ofs.close();
-
     ofs.open("N_8_2.dat");
     for(double i=0.0; i<=to; i+=0.01){
         ofs << i << " " << p_order_N(knot_vector, 8, order, i) << endl; //p_order_N(knot_vector, index, order, coodinate)
     }
+    
     ofs.close();
 }
