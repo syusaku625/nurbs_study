@@ -103,6 +103,10 @@ int main()
             }
             if(fabs(j)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
             if(fabs(j-1.0)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
+            if(fabs(i)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
+            if(fabs(i-1.0)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
+            if(fabs(i-2.0)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
+            if(fabs(i-3.0)<0.01) ofs << r_sum_X << " " << r_sum_Y << endl;
         }
     }
     ofs.close();
