@@ -163,7 +163,7 @@ vector<double> xi_coordinate, vector<double> eta_coordinate, double gauss_1, dou
                 }
 
                 tmp_dRdr/=(sum_W*sum_W);
-                dRdr[i*2+j][dir] = tmp_dRdr;
+                dRdr[i*element_xi[xi_loop_num].size()+j][dir] = tmp_dRdr;
             }
         }
     }
