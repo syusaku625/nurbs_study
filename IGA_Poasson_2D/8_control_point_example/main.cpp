@@ -254,22 +254,48 @@ void input_knot_connectivity(string knot_connectivity_file, vector<int> &knot_co
     ifs.close();
 }
 
+void input_knot_vector(string knot_vector_xi_file,string knot_vector_eta_file,vector<double> &knot_vector_xi, vector<double> &knot_vector_eta)
+{
+    ifstream ifs(knot_vector_xi_file);
+    string str;
+    while(getline(ifs,str)){
+        knot_vector_xi.push_back(stod(str));
+    }
+    ifs.close();
+    ifs.open(knot_vector_eta_file);
+    while(getline(ifs,str)){
+        knot_vector_eta.push_back(stod(str));
+    }
+    ifs.close();
+}
+
 int main()
 {
     int order_xi = 1;
     int order_eta = 2;
-    vector<double> knot_vector_xi={0.0, 0.0, 1.0, 1.0};
-    vector<double> knot_vector_eta={0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0};
+    string input_dir = "input_file";
+    vector<double> knot_vector_xi, knot_vector_eta;
+    string knot_vector_xi_file = input_dir + "/" + "knot_vector_xi.dat";
+    string knot_vector_eta_file = input_dir + "/" + "knot_vector_eta.dat";
+    string control_file = input_dir + "/" + "control.dat";
+    string element_file = input_dir + "/" + "element.dat";
+    string knot_span_xi_file = input_dir + "/" + "knot_span_xi.dat";
+    string knot_span_eta_file = input_dir + "/" + "knot_span_eta.dat";
+    string knot_connectivity_file = input_dir + "/" + "knot_connectivity.dat";
+    string xi_coordinate_file = input_dir + "/" + "xi_coordinate.dat";
+    string eta_coordinate_file = input_dir + "/" + "eta_coordinate.dat";
+
+    input_knot_vector(knot_vector_xi_file,knot_vector_eta_file,knot_vector_xi, knot_vector_eta);
     vector<vector<double>> control_point;
-    input_control("control.dat",control_point);
+    input_control(control_file,control_point);
     vector<vector<int>> element;
-    input_element("element.dat",element);
+    input_element(element_file,element);
     vector<vector<int>> element_xi, element_eta;
-    input_knot_span("knot_span_xi.dat", "knot_span_eta.dat", element_xi, element_eta);
+    input_knot_span(knot_span_xi_file, knot_span_eta_file, element_xi, element_eta);
     vector<double> xi_coordinate, eta_coordinate;
-    input_parametric_coordinate("xi_coordinate.dat", "eta_coordinate.dat", xi_coordinate, eta_coordinate);
+    input_parametric_coordinate(xi_coordinate_file, eta_coordinate_file, xi_coordinate, eta_coordinate);
     vector<int> knot_connectivity_xi, knot_connectivity_eta;
-    input_knot_connectivity("knot_connectivity.dat", knot_connectivity_xi, knot_connectivity_eta);
+    input_knot_connectivity(knot_connectivity_file, knot_connectivity_xi, knot_connectivity_eta);
 
     vector<double> gauss = {-sqrt(3.0/5.0), 0.0, sqrt(3.0/5.0)};
     vector<double> gauss_weight = {5.0/9.0, 5.0/9.0, 5.0/9.0};
@@ -295,8 +321,7 @@ int main()
                         eta_coordinate, gauss_xi, gauss_eta, order_xi, order_eta,  xi_loop_num, eta_loop_num);
                         calc_dxdr(i, control_point, element, dxdr, dRdr);
                         calc_inverse_matrix_2x2(dxdr, drdx);
-                        double detJ1 = dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1];
-                        cout << detJ1 << endl;
+                        double detJ1 = fabs(dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1]);
                         calc_dNdx(i, element, dNdx, dRdr, drdx);
 
                         double detJ2 = 0.5*(eta_coordinate[eta_loop_num+1]-eta_coordinate[eta_loop_num])*\
