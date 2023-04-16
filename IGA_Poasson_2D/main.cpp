@@ -168,6 +168,20 @@ vector<double> xi_coordinate, vector<double> eta_coordinate, double gauss_1, dou
     }
 }
 
+void input_control(string filename, vector<vector<double>> &control_point)
+{
+    ifstream ifs(filename);
+    string str;
+    while(getline(ifs,str)){
+        istringstream ss(str);
+        vector<double> tmp_control;
+        for(int i=0; i<2; i++){
+            getline(ss, str, ' ');
+            tmp_control.push_back(stod(str));
+        }
+        control_point.push_back(tmp_control);
+    }
+}
 
 int main()
 {
@@ -176,16 +190,8 @@ int main()
 
     vector<double> knot_vector_xi={0.0, 0.0, 1.0, 1.0};
     vector<double> knot_vector_eta={0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0};
-    vector<vector<double>> control_point = {
-        {-1, 0},
-        {-1, 0.6},
-        {-0.5, 1.0},
-        {0, 1},
-        {-2, 0},
-        {-2, 1},
-        {-1, 2},
-        {0, 2},
-    };
+    vector<vector<double>> control_point;
+    input_control("control.dat",control_point);
     vector<vector<int>> element = {
         {0,1,2,4,5,6},
         {1,2,3,5,6,7}
@@ -224,7 +230,6 @@ int main()
                         calc_dxdr(i, control_point, element, dxdr, dRdr);
                         calc_inverse_matrix_2x2(dxdr, drdx);
                         double detJ1 = dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1];
-                        cout << detJ1 << endl;
                         calc_dNdx(i, element, dNdx, dRdr, drdx);
                         double detJ2 = 0.25*0.5;
                         K[element[i][j]][element[i][k]] += (dNdx[j][0]*dNdx[k][0]+dNdx[j][1]*dNdx[k][1])*detJ1*detJ2*gauss_weight[l]*gauss_weight[m];

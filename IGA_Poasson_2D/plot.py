@@ -1,6 +1,21 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# ファイルパス
+file_path = "connectivity.dat"
+
+# データの読み込み
+with open(file_path, "r") as f:
+    data = f.readlines()
+
+# データの整形
+x_list = []
+y_list = []
+for line in data:
+    x, y = line.strip().split()
+    x_list.append(float(x))
+    y_list.append(float(y))
+
 # datファイルの読み込み
 data = np.loadtxt('p.dat')
 
@@ -21,6 +36,7 @@ colors = cmap((z - zmin) / (zmax - zmin))
 
 # 2D散布図のプロット
 plt.scatter(x, y, c=colors)
+plt.plot(x_list, y_list, lw=2, color='black',marker='o', markersize=4, markerfacecolor='red')
 
 # 軸ラベルの設定
 plt.xlabel('X Label')
