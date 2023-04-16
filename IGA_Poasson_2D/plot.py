@@ -1,30 +1,32 @@
+import numpy as np
 import matplotlib.pyplot as plt
 
-plt.figure(figsize=[5.0,5.0])
+# datファイルの読み込み
+data = np.loadtxt('p.dat')
 
-# datファイルからデータを読み取る
-with open('output.dat', 'r') as f:
-    data = f.readlines()
-# x座標とy座標のデータをリストに格納
-x = []
-y = []
-for line in data:
-    x_val, y_val = line.strip().split()
-    x.append(float(x_val))
-    y.append(float(y_val))
+# x座標、y座標、スカラー値に分割
+x = data[:, 0]
+y = data[:, 1]
+z = data[:, 2]
 
-with open('control.dat', 'r') as f:
-    data = f.readlines()
-# x座標とy座標のデータをリストに格納
-x_control = []
-y_control = []
-for line in data:
-    x_val= line.strip().split()[0]
-    y_val= line.strip().split()[1]
-    x_control.append(float(x_val))
-    y_control.append(float(y_val))
+# カラーマップの選択（例：jet）
+cmap = plt.get_cmap('jet')
 
-plt.scatter(x_control, y_control, color='red')
+# スカラー値の最大値と最小値を取得
+zmin = np.min(z)
+zmax = np.max(z)
 
-plt.scatter(x, y, color='blue', label='weight=1')
+# カラーマップに対応する色を計算
+colors = cmap((z - zmin) / (zmax - zmin))
+
+# 2D散布図のプロット
+plt.scatter(x, y, c=colors)
+
+# 軸ラベルの設定
+plt.xlabel('X Label')
+plt.ylabel('Y Label')
+
+# カラーバーの表示
+plt.colorbar()
+
 plt.savefig('test.png')

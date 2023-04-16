@@ -7,52 +7,6 @@
 
 using namespace std;
 
-void input_knot_vector_2D(vector<double> &xi, vector<double> &eta)
-{
-    string str;
-    ifstream ifs("knot_vector_xi.dat");
-    while(getline(ifs,str)){
-        xi.push_back(stod(str));
-    }
-    ifs.close();
-    ifs.open("knot_vector_eta.dat");
-    while(getline(ifs,str)){
-        eta.push_back(stod(str));
-    }
-    ifs.close();
-}
-
-void input_control_points_2D(vector<vector<vector<double>>> &control_points, int numOf_fxi, int numOf_feta)
-{
-    string str;
-    ifstream ifs("control.dat");
-    for(int i=0; i<numOf_feta; i++){
-        for(int j=0; j<numOf_fxi; j++){
-            control_points[i][j].resize(2);
-            getline(ifs,str);
-            istringstream ss(str);
-            for(int k=0; k<2; k++){
-                getline(ss,str,' ');
-                control_points[i][j][k] = stod(str);
-            }
-        }
-    }
-    ifs.close();
-}
-
-void input_weight(vector<vector<double>> &weight, int numOf_fxi, int numOf_feta)
-{
-    string str;
-    ifstream ifs("weight.dat");
-    for(int i=0; i<numOf_feta; i++){
-        for(int j=0; j<numOf_fxi; j++){
-            getline(ifs,str);
-            weight[i][j]=stod(str);
-        }
-    }
-    ifs.close();
-}
-
 double return_N0(int index, double c, vector<double> knot_vector)
 {
     if(knot_vector[index] > c && c>=knot_vector[index-1.0]){
@@ -108,111 +62,13 @@ double p_order_dNdr(vector<double> knot_vector, int index, int order, double c)
     return N;
 }
 
-double calc_R_2D(vector<double> knot_vector_xi, vector<double> knot_vector_eta, vector<vector<double>> weight, \
-int numOf_f_xi, int numOf_f_eta, int order_xi, int order_eta, int index_xi, int index_eta, double param_xi, double param_eta)
-{
-    double lower_sum=0.0;
-    for(int m=0; m<numOf_f_eta; m++){
-        for(int n=0; n<numOf_f_xi; n++){
-            lower_sum += p_order_N(knot_vector_xi, n+1, order_xi, param_xi) * p_order_N(knot_vector_eta, m+1, order_eta, param_eta) * weight[m][n];
-        }
-    }
-    double tmp_R = p_order_N(knot_vector_xi, index_xi+1, order_xi, param_xi)*p_order_N(knot_vector_eta, index_eta+1, order_eta, param_eta) * weight[index_eta][index_xi];
-    tmp_R /= lower_sum;
-
-    return tmp_R;
-}
-
-double calc_dRdr_2D_xi(vector<double> knot_vector_xi, vector<double> knot_vector_eta, vector<vector<double>> weight, \
-int numOf_f_xi, int numOf_f_eta, int order_xi, int order_eta, int index_xi, int index_eta, double param_xi, double param_eta)
-{
-    double lower_sum = 0.0;
-    double upper_sum = 0.0;
-    for(int m=0; m<numOf_f_eta; m++){
-        for(int n=0; n<numOf_f_xi; n++){
-            lower_sum += p_order_N(knot_vector_xi, n+1, order_xi, param_xi)*p_order_N(knot_vector_eta,m+1,order_eta,param_eta)*weight[m][n];
-            upper_sum += p_order_dNdr(knot_vector_xi, n+1, order_xi, param_xi)*p_order_N(knot_vector_eta, m+1, order_eta, param_eta)*weight[m][n];
-        }
-    }
-    double tmp_dRdr = weight[index_eta][index_xi]*p_order_dNdr(knot_vector_xi, index_xi+1, order_xi, param_xi)*p_order_N(knot_vector_eta, index_eta+1, order_eta, param_eta)\
-    -upper_sum*calc_R_2D(knot_vector_xi,knot_vector_eta,weight,numOf_f_xi,numOf_f_eta,order_xi,order_eta,index_xi,index_eta,param_xi,param_eta);
-    if(index_xi==3 && index_eta==0){
-        cout << p_order_N(knot_vector_xi, index_xi+1, order_xi, param_xi) << endl;
-    }
-    tmp_dRdr /= lower_sum;
-
-    return tmp_dRdr;
-}
-
-double calc_dRdr_2D_eta(vector<double> knot_vector_xi, vector<double> knot_vector_eta, vector<vector<double>> weight, \
-int numOf_f_xi, int numOf_f_eta, int order_xi, int order_eta, int index_xi, int index_eta, double param_xi, double param_eta)
-{
-    double lower_sum = 0.0;
-    double upper_sum = 0.0;
-    for(int m=0; m<numOf_f_eta; m++){
-        for(int n=0; n<numOf_f_xi; n++){
-            lower_sum += p_order_N(knot_vector_xi, n+1, order_xi, param_xi)*p_order_N(knot_vector_eta,m+1,order_eta,param_eta)*weight[m][n];
-            upper_sum += p_order_N(knot_vector_xi, n+1, order_xi, param_xi)*p_order_dNdr(knot_vector_eta, m+1, order_eta, param_eta)*weight[m][n];
-        }
-    }
-    double tmp_dRdr = weight[index_eta][index_xi]*p_order_N(knot_vector_xi, index_xi+1, order_xi, param_xi)*p_order_dNdr(knot_vector_eta, index_eta+1, order_eta, param_eta)\
-    -upper_sum*calc_R_2D(knot_vector_xi,knot_vector_eta,weight,numOf_f_xi,numOf_f_eta,order_xi,order_eta,index_xi,index_eta,param_xi,param_eta);
-
-    tmp_dRdr /= lower_sum;
-
-    return tmp_dRdr;
-}
-
-vector<vector<double>> calc_dRdr_2D(int ic, vector<vector<int>> IGA_element, vector<double> knot_vector_xi, vector<double> knot_vector_eta, vector<vector<double>> weight, \
-int numOf_f_xi, int numOf_f_eta, int order_xi, int order_eta, double gauss_xi, double gauss_eta)
-{
-    vector<vector<double>> dRdr_2D(IGA_element[ic].size(), vector<double>(2));
-    for(int i=0; i<IGA_element[ic].size(); i++){
-        int index_eta, index_xi;
-        int control_number = IGA_element[ic][i];
-        if(control_number<=4) index_eta=0;
-        else if(control_number>=5 && control_number<=8) index_eta=1;
-        else if(control_number>=9 && control_number<=12) index_eta=2;
-        if(control_number==1 || control_number==5 || control_number==9) index_xi=0;
-        else if(control_number  ==2 || control_number==6 || control_number==10) index_xi=1;
-        else if(control_number==3 || control_number==7 || control_number==11) index_xi=2;
-        else if(control_number==4 || control_number==8 || control_number==12) index_xi=3;
-        if(IGA_element[ic][i]-1==3){
-            cout << index_xi << " " << index_eta << endl;
-        }
-        double dRdr_xi=calc_dRdr_2D_xi(knot_vector_xi, knot_vector_eta, weight, \
-            numOf_f_xi, numOf_f_eta, order_xi, order_eta, index_xi, index_eta, gauss_xi, gauss_eta);
-        double dRdr_eta=calc_dRdr_2D_eta(knot_vector_xi, knot_vector_eta, weight, \
-            numOf_f_xi, numOf_f_eta, order_xi, order_eta, index_xi, index_eta, gauss_xi, gauss_eta);
-        
-        
-        dRdr_2D[i][0] = dRdr_xi;
-        dRdr_2D[i][1] = dRdr_eta;
-        //if(IGA_element[ic][i]-1==3){
-        //    cout << dRdr_xi << " " << dRdr_eta << endl;
-        //}
-    }
-    
-    return dRdr_2D;
-}
-
-void calc_dxdr(int ic, vector<vector<vector<double>>> node, vector<vector<int>> IGA_element, vector<vector<double>> &dxdr, vector<vector<double>> dRdr)
+void calc_dxdr(int ic, vector<vector<double>> node, vector<vector<int>> element, vector<vector<double>> &dxdr, vector<vector<double>> dRdr)
 {
     for(int k=0;k<2;k++){
         for(int l=0;l<2;l++){
             dxdr[k][l] = 0e0;
-            for(int m=0; m<IGA_element[ic].size(); m++){
-                int control_number = IGA_element[ic][m];
-                int eta_dir, xi_dir;
-                int numOf_f_xi = 4;
-                if(control_number%4==0){
-                    eta_dir = control_number/4-1;
-                }
-                else{
-                    eta_dir = control_number/4;
-                }
-                xi_dir = control_number - eta_dir * numOf_f_xi -1;
-                dxdr[k][l] += dRdr[m][k] * node[eta_dir][xi_dir][l];
+            for(int p=0;p<element[ic].size();p++){
+                dxdr[k][l] += dRdr[p][l] * node[element[ic][p]][k];
             }
         }
     }
@@ -229,10 +85,6 @@ void calc_inverse_matrix_2x2(std::vector<std::vector<double>> dxdr, std::vector<
 
 void calc_dNdx(int ic, vector<vector<int>> IGA_element, vector<vector<double>> &dNdx, vector<vector<double>> dNdr, vector<vector<double>> drdx)
 {
-    dNdx.resize(IGA_element[ic].size());
-    for(int i=0; i<dNdx.size(); i++){
-        dNdx[i].resize(2);
-    }
     for(int k=0; k<IGA_element[ic].size(); k++){
       for(int l=0; l<2; l++){
         dNdx[k][l] = 0.0;
@@ -243,167 +95,201 @@ void calc_dNdx(int ic, vector<vector<int>> IGA_element, vector<vector<double>> &
     }
 }
 
+void Jacobi_method(std::vector<double> &p, vector<double> &R, vector<vector<double>> &G, double convergence)
+{
+    vector<double> tmp_p;
+    int NN=p.size();
+    while(1){
+        tmp_p.resize(NN);
+        for (int i = 0; i < NN; i++)
+        {
+            tmp_p[i]=R[i];
+            for (int j = 0; j < NN; j++){
+                if(i!=j){
+                    tmp_p[i] -= G[i][j] * tmp_p[j];
+                }
+            }
+            tmp_p[i] /= G[i][i];
+        }
+        double err = 0.0;
+        for (int i = 0; i < NN; i++){
+            err += fabs(tmp_p[i] - p[i]);
+            p[i] = tmp_p[i];
+        }
+        if (err < convergence){
+            break;
+        }
+    }
+}
+
+void calc_dRdr(vector<vector<double>> &dRdr, int ic, vector<vector<int>> element, vector<vector<int>> element_xi, \
+vector<vector<int>> element_eta, vector<double> knot_vector_xi, vector<double> knot_vector_eta, \
+vector<double> xi_coordinate, vector<double> eta_coordinate, double gauss_1, double gauss_2, int order_xi, int order_eta)
+{   
+    for(int i=0; i<3; i++){//eta dir loop 3
+        for(int j=0; j<2; j++){//xi dir loop 4
+            //xi direction
+            double sum_W=0.0;
+            double sum_dWdr=0.0;
+            for(int k=0; k<3; k++){ //eta dir loop 3
+                for(int l=0; l<2; l++){ //xi dir loop 3
+                    sum_dWdr +=  p_order_dNdr(knot_vector_xi,l+1,order_xi,gauss_1)\
+                    *p_order_N(knot_vector_eta,element_eta[0][k]+1,order_eta,gauss_2);
+                    sum_W += p_order_N(knot_vector_xi,l+1,order_xi,gauss_1)\
+                     * p_order_N(knot_vector_eta,element_eta[0][k]+1,order_eta,gauss_2);
+                }
+            }
+            double tmp_dRdr = p_order_dNdr(knot_vector_xi,j+1,order_xi,gauss_1)\
+            *p_order_N(knot_vector_eta,element_eta[0][i]+1,order_eta,gauss_2)*sum_W\
+            -p_order_N(knot_vector_xi,j+1,order_xi,gauss_1)*\
+            p_order_N(knot_vector_eta,element_eta[0][i]+1,order_eta,gauss_2)*sum_dWdr;
+
+            tmp_dRdr/=(sum_W*sum_W);
+            dRdr[i+3*j][0] = tmp_dRdr;
+
+            //eta direction
+            sum_W=0.0;
+            sum_dWdr=0.0;
+            for(int k=0; k<3; k++){ //eta dir loop 3
+                for(int l=0; l<2; l++){ //xi dir loop 3
+                    sum_dWdr +=  p_order_N(knot_vector_xi,l+1,order_xi,gauss_1)\
+                    *p_order_dNdr(knot_vector_eta,element_eta[ic][k]+1,order_eta,gauss_2);
+                    sum_W += p_order_N(knot_vector_xi,l+1,order_xi,gauss_1)\
+                     * p_order_N(knot_vector_eta,element_eta[ic][k]+1,order_eta,gauss_2);
+                }
+            }
+            tmp_dRdr = p_order_N(knot_vector_xi,j+1,order_xi,gauss_1)\
+            *p_order_dNdr(knot_vector_eta,element_eta[0][i]+1,order_eta,gauss_2)*sum_W\
+            -p_order_N(knot_vector_xi,j+1,order_xi,gauss_1)*\
+            p_order_N(knot_vector_eta,element_eta[0][i]+1,order_eta,gauss_2)*sum_dWdr;
+            tmp_dRdr/=(sum_W*sum_W);
+            dRdr[i+3*j][1] = tmp_dRdr;
+        }
+    }
+}
+
+
 int main()
 {
-    int order_xi = 2;
+    int order_xi = 1;
     int order_eta = 2;
 
-    vector<double> knot_vector_xi={0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0};
-    vector<double> knot_vector_eta={0.0, 0.0, 0.0, 1.0, 1.0, 1.0};
+    vector<double> knot_vector_xi={0.0, 0.0, 1.0, 1.0};
+    vector<double> knot_vector_eta={0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0};
     vector<vector<double>> control_point = {
         {-1, 0},
-        {-1, 0.41421356},
-        {-0.41421356, 1},
+        {-1, 0.6},
+        {-0.5, 1.0},
         {0, 1},
-        {-2.5, 0},
-        {-2.5, 0.75},
-        {-0.75, 2.5},
-        {0, 2.5},
-        {-4, 0},
-        {-4, 4},
-        {-4, 4},
-        {0, 4}
-    };
-    vector<vector<double>> nurbs_weight = {
-
+        {-2, 0},
+        {-2, 1},
+        {-1, 2},
+        {0, 2},
     };
     vector<vector<int>> element = {
-        {0,1,2,4,5,6,8,9,10},
-        {1,2,3,5,6,7,9,10,11}
+        {0,1,2,4,5,6},
+        {1,2,3,5,6,7}
     };
-    vector<double> gauss = {-0.86113, -0.33998, 0.33998, 0.86113};
-    vector<double> gauss_weight = {0.34785, 0.65214, 0.65214, 0.34785};
 
-    vector<double> xi_coordinate = {0.0, 0.5, 1.0};
-    vector<double> eta_coordinate = {0.0, 1.0};
+    vector<vector<int>> element_xi = {
+        {0, 1}
+    };
+    vector<vector<int>> element_eta = {
+        {0,1,2},
+        {1,2,3}
+    };
 
-    vector<vector<double>> K(4, vector<double>(4));
+    vector<double> gauss = {-sqrt(3.0/5.0), 0.0, sqrt(3.0/5.0)};
+    vector<double> gauss_weight = {5.0/9.0, 5.0/9.0, 5.0/9.0};
+
+    vector<double> xi_coordinate = {0.0, 1.0};
+    vector<double> eta_coordinate = {0.0, 0.5, 1.0};
+
+    vector<vector<double>> K(control_point.size(), vector<double>(control_point.size()));
 
     for(int i=0; i<element.size(); i++){//elementループ
         for(int j=0; j<element[i].size(); j++){//control_pointのループ(row)
-            for(int k=0; k<element[i].size(); j++){//control_pointのループ(column)
-                for(int l=0; l<gauss.size(); l){
-                    
+            for(int k=0; k<element[i].size(); k++){//control_pointのループ(column)
+                for(int l=0; l<gauss.size(); l++){//gauss loop 1
+                    for(int m=0; m<gauss.size(); m++){//gauss loop 2
+                        double gauss_eta = 0.5*((eta_coordinate[i+1]-eta_coordinate[i])*\
+                            gauss[m]+(eta_coordinate[i]+eta_coordinate[i+1]));
+                        double gauss_xi = 0.5*(1.0*gauss[l]+1.0);
+                        vector<vector<double>> dxdr(2, vector<double>(2));
+                        vector<vector<double>> drdx(2, vector<double>(2));
+                        vector<vector<double>> dNdx(element[i].size(), vector<double>(2));
+                        vector<vector<double>> dRdr(element[i].size(), vector<double>(2));
+                        calc_dRdr(dRdr, i, element, element_xi, element_eta, knot_vector_xi, knot_vector_eta, xi_coordinate, \
+                        eta_coordinate, gauss_xi, gauss_eta, order_xi, order_eta);
+                        calc_dxdr(i, control_point, element, dxdr, dRdr);
+                        calc_inverse_matrix_2x2(dxdr, drdx);
+                        double detJ1 = dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1];
+                        cout << detJ1 << endl;
+                        calc_dNdx(i, element, dNdx, dRdr, drdx);
+                        double detJ2 = 0.25*0.5;
+                        K[element[i][j]][element[i][k]] += (dNdx[j][0]*dNdx[k][0]+dNdx[j][1]*dNdx[k][1])*detJ1*detJ2*gauss_weight[l]*gauss_weight[m];
+                    }
                 }
             }
         }
     }
 
-    //vector<vector<vector<double>>> control_points;
-    //vector<vector<double>> weight;
-//
-    //input_knot_vector_2D(knot_vector_xi, knot_vector_eta);
-//
-    //int order_xi=2, order_eta=2;
-    //int numOf_f_xi = knot_vector_xi.size()-1-order_xi;
-    //int numOf_f_eta = knot_vector_eta.size()-1-order_eta;
-    //control_points.resize(numOf_f_eta);
-    //weight.resize(numOf_f_eta);
-    //for(int i=0; i<numOf_f_eta; i++){
-    //    control_points[i].resize(numOf_f_xi);
-    //    weight[i].resize(numOf_f_xi);
-    //}
-    //input_control_points_2D(control_points, numOf_f_xi, numOf_f_eta);
-//
-    //input_weight(weight, numOf_f_xi, numOf_f_eta);
-//
-    //cout << "numOfeta: " << numOf_f_eta << endl;
-    //cout << "numOfxi: " << numOf_f_xi << endl;
-    //ofstream ofs("output.dat");
-    //for(double i=0.0; i<=1.0; i+=0.5){
-    //   for(double j=0.0; j<=1.0; j+=0.5){
-    //       double r_sum_X=0.0;
-    //       double r_sum_Y=0.0;
-    //       for(int index_eta=0; index_eta<numOf_f_eta; index_eta++){
-    //           for(int index_xi=0; index_xi<numOf_f_xi; index_xi++){
-    //               double R = calc_R_2D(knot_vector_xi,knot_vector_eta,weight,numOf_f_xi,numOf_f_eta,order_xi,order_eta,index_xi,index_eta,j,i);
-    //               r_sum_X += R * control_points[index_eta][index_xi][0];
-    //               r_sum_Y += R * control_points[index_eta][index_xi][1];
-    //           }
-    //       }
-    //       ofs << r_sum_X << " " << r_sum_Y << endl;
-    //   }
-    //}
+    for(int i=0; i<8; i++){
+        for(int j=0; j<8; j++){
+            cout << K[i][j] << " ";
+        }
+        cout << endl;
+    }
 
-    //vector<vector<double>> K(control_points.size()*control_points[0].size(), vector<double>(control_points.size()*control_points[0].size(), 0.0));
-    //vector<double> p(control_points.size());
-//
-    //vector<vector<int>> IGA_element = {{1,2,3,5,6,7,9,10,11},{2,3,4,6,7,8,10,11,12}};
-//
-    //vector<double> gauss(3,0.0);
-    //vector<double> gauss_weight(3, 0.0);
-    //gauss[0] = -sqrt(3.0/5.0); gauss[1] = 0.0; gauss[2] = sqrt(3.0/5.0); 
-    //gauss_weight[0] = 0.55556; gauss_weight[1] = 0.88889; gauss_weight[2] = 0.55556;
-    //vector<vector<double>> dxdr(2, vector<double>(2)), drdx(2, vector<double>(2));
-    //vector<vector<double>> dNdx;;
+    vector<double> b(8);
+    b[0] = 1.0;
+    b[4] = 1.0;
+    b[3] = 0.0;
+    b[7] = 0.0;
 
-    //for(int i=0; i<2; i++){ //for element
-    //    for(int j=0; j<9; j++){
-    //        for(int k=0; k<9; k++){ 
-    //            for(int l=0; l<3; l++){//gauss
-    //                for(int m=0; m<3; m++){//gauss      
-    //                    vector<vector<double>> dRdr =  calc_dRdr_2D(i, IGA_element, knot_vector_xi, knot_vector_eta, weight, \
-    //                        numOf_f_xi, numOf_f_eta, order_xi, order_eta, (gauss[m]*0.5+0.5)*0.5, (gauss[l]*1.0+1.0)*0.5);
-    //                    
-    //                    calc_dxdr(i, control_points, IGA_element, dxdr, dRdr);
-    //                    
-    //                    calc_inverse_matrix_2x2(dxdr, drdx);
-    //                    
-    //                    calc_dNdx(i, IGA_element, dNdx, dRdr, drdx);
-    //                    
-    //                    double detJ1 = fabs(dxdr[0][0] * dxdr[1][1]  - dxdr[1][0] * dxdr[0][1]);
-    //                    double detJ2 = 1.0 / 8.0;
-    //                    K[IGA_element[i][j]-1][IGA_element[i][k]-1] += (dNdx[j][0]*dNdx[k][0] + dNdx[j][1] * dNdx[k][1]) * detJ1 * detJ2 * gauss_weight[l];
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
+    for(int i=0; i<K.size(); i++){
+        K[0][i] = 0.0;
+        K[4][i] = 0.0;
+        K[3][i] = 0.0;
+        K[7][i] = 0.0;
+    }
+    K[0][0] = 1.0;
+    K[4][4] = 1.0;
+    K[3][3] = 1.0;
+    K[7][7] = 1.0;
 
-    //for(int i=0; i<K.size(); i++){
-    //    for(int j=0; j<K[i].size(); j++){
-    //        cout << K[3][j] << " ";
-    //    }
-    //    cout << endl;
-    //}
-//
-    //exit(1);
-    //for(int i=0; i<K[i].size(); i++){
-    //    K[11][i] = 0.0;
-    //}
-    //K[11][11] = 1.0;
-//
-    //vector<double> b={0,0,0,0,0,0,0,0,0,0,0,1.0};
-    //vector<double> u(12,0.0);
-    ////連立方程式ソルバー
-    //int count=1;
-    //while(1){
-    //    vector<double> u_tmp(u.size(),0.0);
-    //    for(int j=0; j<u_tmp.size(); j++){
-    //        u_tmp[j]=b[j];
-    //    }
-//
-    //    for(int j=0; j<u.size(); j++){
-    //        for(int k=0; k<u.size(); k++){
-    //            if(j!=k){
-    //                u_tmp[j]-=K[j][k]*u[k];
-    //            }
-    //        }
-    //        u_tmp[j]/=K[j][j];
-    //    }
-    //    double error=0;
-    //    for(int j=0; j<u.size(); j++){
-    //        error+=fabs(u[j]-u_tmp[j]);
-    //    }
-    //    cout << "iter : " << count << "  " << "error : " << error << endl;
-    //    for(int j=0; j<u.size(); j++){
-    //        u[j]=u_tmp[j];
-    //    }
-    //    u[0]=1.0;
-    //    if(error<1e-5){
-    //        break;
-    //    }
-    //    count++;
-    //    break;
-    //}
+    double convegence=0.00001;
+
+    vector<double> u(8);
+    Jacobi_method(u, b, K, convegence);
+    for(int i=0; i<u.size(); i++){
+        cout << u[i] << endl;
+    }
+
+    ofstream ofs("p.dat");
+    for(double i=0; i<=1.0; i+=0.01){
+        //cout << i << endl;
+        for(double j=0; j<=1.0; j+=0.01){
+            double r_sum_u=0.0;
+            double r_sum_X=0.0;
+            double r_sum_Y=0.0;
+            for(int k=0; k<4; k++){
+                for(int l=0; l<2; l++){
+                    double lower_sum=0.0;
+                    for(int m=0; m<4; m++){
+                        for(int n=0; n<2; n++){
+                            lower_sum += p_order_N(knot_vector_xi, n+1, order_xi, i) * p_order_N(knot_vector_eta, m+1, order_eta, j);
+                        }
+                    }
+                    double tmp_R = p_order_N(knot_vector_xi, l+1, order_xi, i)*p_order_N(knot_vector_eta, k+1, order_eta, j);
+                    tmp_R /= lower_sum;
+
+                    r_sum_u += tmp_R * u[4*l+k];
+                    r_sum_X += tmp_R * control_point[k+4*l][0];
+                    r_sum_Y += tmp_R * control_point[k+4*l][1];
+                }
+            }
+            ofs << r_sum_X << " " << r_sum_Y << " " << r_sum_u << endl;
+        }
+    }
 }
