@@ -168,7 +168,12 @@ int main()
     
     
     final_operator = Transposed_mat(final_operator);
+
+    for(int i =0; i<knot_vector.size(); i++){
+        cout << knot_vector[i] << endl;
+    }
     
+    cout << final_operator.size() << " " << final_operator[0].size() << endl;
     ofs.open("result3.dat");
     for(double i=0.0; i<=4.0; i+=0.001){
         for(int j=0; j<final_operator.size(); j++){
