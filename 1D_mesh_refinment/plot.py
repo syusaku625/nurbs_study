@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # ファイルパス
-file_path = "result1.dat"
+file_path = "result3.dat"
 
 # データの読み込み
 data = np.loadtxt(file_path, dtype=float)

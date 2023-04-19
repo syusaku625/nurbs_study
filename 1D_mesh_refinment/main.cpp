@@ -71,10 +71,6 @@ void insert_knot_to_current_knot_vector(vector<double> &old_knot_vector, double 
         }
     }
     old_knot_vector = tmp_knot_vector;
-    //for(int i=0; i<old_knot_vector.size(); i++){
-    //    cout << old_knot_vector[i] << " ";
-    //}
-    //cout << endl;
 }
 
 vector<vector<double>> Transposed_mat(vector<vector<double>> C)
@@ -101,24 +97,9 @@ vector<vector<double>> mat_product(vector<vector<double>> C1, vector<vector<doub
     return tmp_C;
 }
 
-
-int main()
+vector<vector<double>> one_d_ectraction_operator(int numOfk, int order, vector<double> &knot_vector, vector<double> insert_knot)
 {
-    //n=k+order+1
-    ofstream ofs("result1.dat");
-    int order = 3;
-    vector<double> knot_vector = {0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0, 4.0, 4.0, 4.0};
-    int numOfk_initial=knot_vector.size()-order-1;
-    for(double i=0.0; i<=4.0; i+=0.01){
-        for(int j=0; j<numOfk_initial; j++){
-            ofs << j << " " << i << " " << p_order_N(knot_vector, j+1, order, i) << endl;
-        }
-    }
-    ofs.close();
-    map<int, int> insert_position_memory;
-    vector<double> insert_knot = {1.0, 1.0, 2.0, 2.0, 3.0, 3.0};
     vector<vector<vector<double>>> operator_C;
-    int numOfk=knot_vector.size()-order-1;
     for(int i=1; i<=insert_knot.size(); i++){
         int insert_position = return_insert_position(knot_vector, insert_knot[i-1]);
         if(i!=1){
@@ -129,7 +110,7 @@ int main()
         
         vector<double> alpha;
         for(int j=0; j<numOfk+i; j++){
-            cout << numOfk+1 << " " << j << " " << insert_position+1 << " ";
+            //cout << numOfk+1 << " " << j << " " << insert_position+1 << " ";
 
             if(j+1<=insert_position-order && j+1>=1){
                 alpha.push_back(1.0);
@@ -162,11 +143,41 @@ int main()
     }
 
     final_operator = Transposed_mat(final_operator);
-    ofstream ofs2("result2.csv");
-    for(int i=0; i<final_operator.size(); i++){
-        for(int j=0; j<final_operator[0].size(); j++){
-            ofs2 << final_operator[i][j] << ",";
+
+    return final_operator;
+}
+
+int main()
+{
+    //n=k+order+1
+    ofstream ofs("result1.dat");
+    int order = 3;
+    vector<double> knot_vector = {0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0, 4.0, 4.0, 4.0};
+    int numOfk=knot_vector.size()-order-1;
+    for(double i=0.0; i<=4.0; i+=0.01){
+        for(int j=0; j<numOfk; j++){
+            ofs << j << " " << i << " " << p_order_N(knot_vector, j+1, order, i) << endl;
         }
-        ofs2 << endl;
     }
+    ofs.close();
+
+    vector<double> insert_knot = {1.0, 1.0, 2.0, 2.0, 3.0, 3.0};
+    
+
+    vector<vector<double>> final_operator = one_d_ectraction_operator(numOfk, order, knot_vector, insert_knot);
+    
+    
+    final_operator = Transposed_mat(final_operator);
+    
+    ofs.open("result3.dat");
+    for(double i=0.0; i<=4.0; i+=0.001){
+        for(int j=0; j<final_operator.size(); j++){
+            double sum =0.0;
+            for(int k=0; k<final_operator[0].size(); k++){
+                sum += final_operator[j][k] * p_order_N(knot_vector, j+1, order, i);
+            }
+            ofs << j << " " << i << " " << sum << endl;
+        }
+    }
+    ofs.close();
 }
