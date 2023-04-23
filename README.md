@@ -8,4 +8,4 @@ Isogeometric Analysisの勉強用のコード
 
 2D線形弾性体実装
 
-3D円柱で梁（paraviewで可視化）
+次のタスク：3D円柱で梁（paraviewで可視化）
