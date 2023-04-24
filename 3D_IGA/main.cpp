@@ -723,7 +723,6 @@ int main()
 
     vector<double> u(control_point.size()*3, 0.0);
 
-    //vector<int> boundary_wall = {0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68};
     vector<int> boundary_wall = {0,4,8,12};
     vector<int> boundary_f = {3,7,11,15};
 
@@ -745,9 +744,6 @@ int main()
 
     double convegence=0.00001;
     Jacobi_method(u, f, K, convegence);
-    for(int i=0; i<u.size(); i++){
-        cout << u[i] << endl;
-    }
 
     //可視化プロセス
     vector<vector<double>> x;
@@ -761,10 +757,8 @@ int main()
     double delta_xi =1.0/(double)interpolate_element_xi;
     double delta_zeta =1.0/(double)interpolate_element_zeta;
 
-    //cout << "check3" << endl;
 
     for(double i=0; i<=1.0; i+=delta_eta){//eta
-        //cout << i << endl;
         for(double j=0.0; j<=1.0; j+=delta_xi){//xi
             for(double k=0.0; k<=1.0; k+=delta_zeta){//zeta
                 double r_sum_ux=0.0;
@@ -810,13 +804,9 @@ int main()
                 tmp_displacement.push_back(r_sum_ux);
                 tmp_displacement.push_back(r_sum_uy);
                 tmp_displacement.push_back(r_sum_uz);
-//
+
                 x.push_back(tmp_x);
                 displacement.push_back(tmp_displacement);
-                //]displacement.resize(x.size());
-                //for(int i=0; i<x.size(); i++){
-                //    displacement[i].resize(3);
-                //}
             }
         }
     }
