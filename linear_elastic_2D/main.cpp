@@ -462,4 +462,26 @@ int main()
             output << r_sum_X << " " << r_sum_Y << " " << r_sum_ux << " " << r_sum_uy << endl;
         }
     }
+
+    double r_sum_ux=0.0;
+    double r_sum_uy=0.0;
+    double r_sum_X=0.0;
+    double r_sum_Y=0.0;
+    for(int k=0; k<4; k++){
+        for(int l=0; l<2; l++){
+            double lower_sum=0.0;
+            for(int m=0; m<4; m++){
+                for(int n=0; n<2; n++){
+                    lower_sum += p_order_N(knot_vector_xi, n+1, order_xi, 0.0) * p_order_N(knot_vector_eta, m+1, order_eta, 0.0)*control_weight[m*2+n];
+                }
+            }
+            double tmp_R = p_order_N(knot_vector_xi, l+1, order_xi, 0.0)*p_order_N(knot_vector_eta, k+1, order_eta, 0.0)*control_weight[k*2+l];
+            tmp_R /= lower_sum;
+            r_sum_ux += tmp_R * u[(k*2+l)*2];
+            r_sum_uy += tmp_R * u[(k*2+l)*2+1];
+            r_sum_X += tmp_R * (control_point[k*2+l][0]+u[(k*2+l)*2]);
+            r_sum_Y += tmp_R * (control_point[k*2+l][1]+u[(k*2+l)*2+1]);
+        }
+    }
+    cout << r_sum_X << " " << r_sum_Y << " " << r_sum_ux << " " << r_sum_uy << endl;
 }
